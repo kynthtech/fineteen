@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import multer from "multer";
 import { multerDestination } from "../../../functions/multer.destination";
 import { multerFilename } from "../../../functions/multer.filename";

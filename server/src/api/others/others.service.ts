@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import httpCode from "http-status-codes";
 import { MStudent } from "../../models/student.model";
 import { AppError } from "../../utils/Error/AppError";

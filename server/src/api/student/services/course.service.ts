@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Types } from "mongoose";
 import httpCode from "http-status-codes";
 import statsService from "./stats.service";

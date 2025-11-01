@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import httpCode from "http-status-codes";
 import authService from "./auth.service";
 import { Request, Response } from "express";

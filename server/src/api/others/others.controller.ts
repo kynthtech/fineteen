@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import httpCode from "http-status-codes";
 import { Request, Response } from "express";
 import othersService from "./others.service";

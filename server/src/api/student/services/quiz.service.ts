@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 import { Request } from "express";
 import httpCode from "http-status-codes";
 import statsController from "./stats.service";

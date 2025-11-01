@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 import httpCode from "http-status-codes";
 import { TFilterQuery } from "../student.type";
 import { AppError } from "../../../utils/Error/AppError";

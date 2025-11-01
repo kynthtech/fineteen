@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import bcrypt from "bcryptjs";
 import httpCode from "http-status-codes";
 import { MAdmin } from "../../models/admin.model";

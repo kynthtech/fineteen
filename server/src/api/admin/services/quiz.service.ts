@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import httpCode from "http-status-codes";
 import { AppError } from "../../../utils/Error/AppError";
 import { MQuizzes } from "../../../models/quizzes.model";

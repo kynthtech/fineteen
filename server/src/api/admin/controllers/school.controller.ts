@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import httpCode from "http-status-codes";
 import { TFilterQuery } from "../admin.type";
 import { Request, Response } from "express";

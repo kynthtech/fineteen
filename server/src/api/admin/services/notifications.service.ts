@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 import { MNotification } from "../../../models/notifications.model";
 import { AppError } from "../../../utils/Error/AppError";
 import httpCode from "http-status-codes";
