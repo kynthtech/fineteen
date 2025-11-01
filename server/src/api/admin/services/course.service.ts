@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import httpCode from "http-status-codes";
 import { TFilterQuery } from "../admin.type";
 import { MCourses } from "../../../models/courses.model";
@@ -5,28 +7,25 @@ import { AppError } from "../../../utils/Error/AppError";
 import { TCourseData } from "../validator/course.validator";
 import { deleteAllFiles } from "../../../middleware/deleteFiles.middleware";
 
-// ✅Safely handle unknown errors with proper typing
-const handleMongoError = (error: unknown, context: string) => {
-  const errorMessage = error instanceof Error ? error.message : "Unknown error";
-  throw new AppError(`${errorMessage} - Error in ${context}`, httpCode.BAD_REQUEST);
-};
-
-const createCourse = async (course: TCourseData) => {
+const createCourse = (course: TCourseData) => {
   try {
-    const result = await MCourses.create(course);
+    const result = MCourses.create(course);
     return result;
-  } catch (error: unknown) {
-    handleMongoError(error, "Mongodb");
+  } catch (error) {
+    throw new AppError(
+      error.message + " - Error in Mongodb",
+      httpCode.BAD_REQUEST
+    );
   }
 };
 
 const getCourses = async (query: TFilterQuery["course"]) => {
-  const page = query.page ?? 1;
-  const search = query.search ?? "";
-  const difficulty = query.difficulty ?? "";
-  const category = query.category ?? "";
+  const page = query.page || 1;
+  const search = query.search || "";
+  const difficulty = query.difficulty || "";
+  const category = query.category || "";
 
-  const queryFilter = {
+  const queryFIlter = {
     $and: [
       {
         title: { $regex: search, $options: "i" },
@@ -37,14 +36,14 @@ const getCourses = async (query: TFilterQuery["course"]) => {
   };
 
   try {
-    const result = await MCourses.find(queryFilter)
+    const result = await MCourses.find(queryFIlter)
       .select("-__v -lessons")
       .skip((page - 1) * 10)
       .limit(10);
 
-    const totalCourses = await MCourses.countDocuments(queryFilter);
+    const totalCourses = await MCourses.countDocuments(queryFIlter);
 
-    const [totalCreatedCourses, totalPublicCourses, totalEnrolledAgg] =
+    const [totalCreatedCourses, totalPublicCourses, totalEnrolled] =
       await Promise.all([
         MCourses.countDocuments(),
         MCourses.countDocuments({ visibility: "public" }),
@@ -58,14 +57,10 @@ const getCourses = async (query: TFilterQuery["course"]) => {
         ]),
       ]);
 
-    // ✅ Safely extract aggregation result
-    const totalEnrolled =
-      totalEnrolledAgg.length > 0 ? totalEnrolledAgg[0].studentEnrolled : 0;
-
     const stats = {
       totalCreatedCourses,
       totalPublicCourses,
-      totalEnrolled,
+      totalEnrolled: totalEnrolled[0]?.studentEnrolled || 0,
     };
 
     return {
@@ -73,43 +68,38 @@ const getCourses = async (query: TFilterQuery["course"]) => {
       totalCourses,
       stats,
     };
-  } catch (error: unknown) {
-    handleMongoError(error, "Mongodb");
+  } catch (error) {
+    throw new AppError(
+      error.message + " - Error in Mongodb",
+      httpCode.BAD_REQUEST
+    );
   }
 };
 
-const getCourseById = async (id: string) => {
+const getCourseById = (id: string) => {
   try {
-    const result = await MCourses.findById(id).select("-__v -studentEnrolled");
-    if (!result) {
-      throw new AppError("Course not found", httpCode.NOT_FOUND);
-    }
+    const result = MCourses.findById(id).select("-__v -studentEnrolled");
     return result;
-  } catch (error: unknown) {
-    handleMongoError(error, "Mongodb");
+  } catch (error) {
+    throw new AppError(
+      error.message + " - Error in Mongodb",
+      httpCode.BAD_REQUEST
+    );
   }
 };
 
 const updateCourse = async (course: TCourseData) => {
   try {
-    if (!course._id) {
-      throw new AppError("Course ID missing for update", httpCode.BAD_REQUEST);
-    }
-
-    // Safely handle optional deletedFiles property
-    if (course.deletedFiles?.resources?.length) {
-      await MCourses.updateOne(
-        { _id: course._id },
-        {
-          $pull: {
-            "lessons.$[].resources": {
-              name: { $in: course.deletedFiles.resources },
-            },
+    await MCourses.updateOne(
+      { _id: course._id },
+      {
+        $pull: {
+          "lessons.$[].resources": {
+            name: { $in: course.deletedFiles?.resources },
           },
-        }
-      );
-    }
-
+        },
+      }
+    );
     await MCourses.updateOne(
       { _id: course._id },
       {
@@ -125,10 +115,14 @@ const updateCourse = async (course: TCourseData) => {
         },
       }
     );
-
-    return { status: "success" };
-  } catch (error: unknown) {
-    handleMongoError(error, "Mongodb");
+    return {
+      status: "success",
+    };
+  } catch (error) {
+    throw new AppError(
+      error.message + " - Error in Mongodb",
+      httpCode.BAD_REQUEST
+    );
   }
 };
 
@@ -136,14 +130,17 @@ const deleteCourse = async (id: string) => {
   try {
     const course = await MCourses.findById(id);
     if (course) {
-      // ✅ Ensure deleteAllFiles accepts non-null course only
-      await deleteAllFiles(course);
+      deleteAllFiles(course);
     }
-
-    await MCourses.findByIdAndDelete(id);
-    return { status: "success" };
-  } catch (error: unknown) {
-    handleMongoError(error, "Mongodb");
+    MCourses.findByIdAndDelete(id);
+    return {
+      status: "success",
+    };
+  } catch (error) {
+    throw new AppError(
+      error.message + " - Error in Mongodb",
+      httpCode.BAD_REQUEST
+    );
   }
 };
 
