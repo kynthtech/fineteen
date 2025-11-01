@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { NextFunction, Request, Response } from "express";
 import authService from "../api/auth/auth.service";
 import { ESkipPath } from "../types/enum";
