@@ -1,0 +1,9 @@
+{
+  "name": "fin-teen",
+  "version": "1.0.0",
+  "description": "the school app",
+  "scripts": {
+    "start:web": "cd client && npm run dev",
+    "start:server": "cd server && npm run dev"
+  }
+}
